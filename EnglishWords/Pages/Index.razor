@@ -1,0 +1,64 @@
+﻿@page "/"
+@inject IEnglishWordService EnglishWordService
+
+<PageTitle>Index</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">English Words Test used in WPF 4.5 Unleashed</MudText>
+<br />
+
+<MudText Typo="Typo.h5" GutterBottom="true">@word</MudText>
+<br />
+
+@if (dispResult == true)
+{
+    <MudText Typo="Typo.h5" GutterBottom="true">@meaning</MudText>
+    <br />
+}
+else
+{
+    
+}
+
+@if (dispResult == false)
+{
+    <button type="button" class="btn btn-primary" @onclick="ShowResult">表示</button>
+}
+else
+{
+    <button type="button" class="btn btn-primary" @onclick="ShowNext">次</button>
+}
+
+
+@code {
+    private List<EnglishWord> englishWords;
+    private EnglishWord singleWord;
+    private string word;
+    private string meaning;
+
+    private bool dispResult = false;
+
+    protected override void OnInitialized()
+    {
+        //ユーザー一覧データの取得
+        englishWords = EnglishWordService.GetAll().ToList();
+        singleWord = englishWords.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+        word = singleWord.Word;
+        meaning = singleWord.Meaning;
+
+    }
+
+    private void ShowResult()
+    {
+        dispResult = true;
+        this.StateHasChanged();
+    }
+
+    private void ShowNext()
+    {
+        singleWord = englishWords.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+        word = singleWord.Word;
+        meaning = singleWord.Meaning;
+        dispResult = false;
+        this.StateHasChanged();
+    }
+}
