@@ -1,5 +1,36 @@
-﻿<h3>List</h3>
+﻿@page "/list"
+@inject IEnglishWordService EnglishWordService
+
+<PageTitle>Words List</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">English Words List</MudText>
+<br />
+
+@if (englishWords != null)
+{
+    <MudTable Items="englishWords" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            @*<MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<EnglishWord, object>(x=>x.UserId)">ユーザー番号</MudTableSortLabel></MudTh>*@
+            <MudTh><MudTableSortLabel SortBy="new Func<EnglishWord, object>(x=>x.Word)"><strong>単語</strong></MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EnglishWord, object>(x=>x.Meaning)"><strong>意味</strong></MudTableSortLabel></MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="単語">@context.Word</MudTd>
+            <MudTd DataLabel="意味">@context.Meaning</MudTd>
+        </RowTemplate>
+        
+    </MudTable>
+
+}
 
 @code {
+    private List<EnglishWord> englishWords;
+
+    protected override void OnInitialized()
+    {
+        //英単語一覧の取得
+        englishWords = EnglishWordService.GetAll().ToList();
+    }
 
 }
