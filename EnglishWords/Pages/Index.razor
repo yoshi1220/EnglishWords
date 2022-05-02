@@ -1,7 +1,7 @@
 ﻿@page "/"
 @inject IEnglishWordService EnglishWordService
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Learning</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">English Words Test used in WPF 4.5 Unleashed</MudText>
 <br />
@@ -16,7 +16,7 @@
 }
 else
 {
-    
+
 }
 
 @if (dispResult == false)
@@ -31,17 +31,25 @@ else
 
 @code {
     private List<EnglishWord> englishWords;
+    private List<int> randomNumbers;
     private EnglishWord singleWord;
     private string word;
     private string meaning;
+    private int count = 0;
 
     private bool dispResult = false;
 
     protected override void OnInitialized()
     {
-        //ユーザー一覧データの取得
+        //英単語一覧の取得
         englishWords = EnglishWordService.GetAll().ToList();
-        singleWord = englishWords.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+
+        //表示順の乱数取得
+        randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
+
+
+        //初期単語の表示
+        singleWord = englishWords[randomNumbers[count]];
         word = singleWord.Word;
         meaning = singleWord.Meaning;
 
@@ -55,10 +63,44 @@ else
 
     private void ShowNext()
     {
-        singleWord = englishWords.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+        count++;
+        if (count == englishWords.Count)
+        {
+            count = 0;
+        }
+
+        //次の単語の情報をセット
+        singleWord = englishWords[randomNumbers[count]];
         word = singleWord.Word;
         meaning = singleWord.Meaning;
         dispResult = false;
         this.StateHasChanged();
+    }
+
+    /// <summary>
+    /// 指定範囲で、重複のない乱数を生成する
+    /// </summary>
+    /// <param name="rangeBegin"></param>
+    /// <param name="rangeEnd"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    IEnumerable<int> GetUniqRandomNumbersEasy(int rangeBegin, int rangeEnd, int count)
+    {
+        // 指定された範囲の整数で埋めたリストを用意する
+        List<int> work
+          = Enumerable.Range(rangeBegin, rangeEnd - rangeBegin + 1).ToList();
+
+        // workからランダムに取り出して、順に返していく（count回繰り返す）
+        var rnd = new Random();
+        for (int i = 0; i < count; i++)
+        {
+            // workからランダムに1つ選んで値を取り出す
+            int pos = rnd.Next(0, work.Count);
+            int value = work[pos];
+            work.RemoveAt(pos); // 取り出した値はリストから取り去る
+
+            // 取り出した値を順に返す
+            yield return value;
+        }
     }
 }
