@@ -6,18 +6,12 @@
 <MudText Typo="Typo.h4" GutterBottom="true">English Words Test used in WPF 4.5 Unleashed</MudText>
 <br />
 
-<MudText Typo="Typo.h5" GutterBottom="true">@word</MudText>
+
+<MudText>周回数: @laps, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
 <br />
 
-@if (dispResult == true)
-{
-    <MudText Typo="Typo.h5" GutterBottom="true">@meaning</MudText>
-    <br />
-}
-else
-{
-
-}
+<MudText Typo="Typo.h5" GutterBottom="true">@word</MudText>
+<br />
 
 @if (dispResult == false)
 {
@@ -25,8 +19,18 @@ else
 }
 else
 {
-    <button type="button" class="btn btn-primary" @onclick="ShowNext">次</button>
+    <button type="button" class="btn btn-secondary" @onclick="ShowNext">次</button>
 }
+
+<br />
+<br />
+
+@if (dispResult == true)
+{
+    <MudText Typo="Typo.h5" GutterBottom="true">@meaning</MudText>
+}
+
+
 
 
 @code {
@@ -36,6 +40,7 @@ else
     private string word;
     private string meaning;
     private int count = 0;
+    private int laps = 1;
 
     private bool dispResult = false;
 
@@ -67,6 +72,7 @@ else
         if (count == englishWords.Count)
         {
             count = 0;
+            laps++;
         }
 
         //次の単語の情報をセット
