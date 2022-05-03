@@ -1,46 +1,57 @@
-﻿@page "/"
+﻿@page "/mistaken"
 @inject IEnglishWordService EnglishWordService
 @inject IRecordService RecordService
 
 <PageTitle>Learning</PageTitle>
 
-<MudText Typo="Typo.h4" GutterBottom="true">English Words Test used in WPF 4.5 Unleashed</MudText>
-@if (reviewMode)
+<MudText Typo="Typo.h4" GutterBottom="true">間違えたことのある単語だけモード</MudText>
+
+@if (englishWords.Count != 0)
 {
-    <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
-}
-
-<br />
 
 
-<MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
-<br />
+    @if (reviewMode)
+    {
+        <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
+    }
 
-<MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
-<br />
+    <br />
 
 
-@if (dispResult == true)
-{
-    <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
+    <MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
+    <br />
+
+    <MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
+    <br />
+
+
+    @if (dispResult == true)
+    {
+        <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
+    }
+    else
+    {
+        <MudText><strong>意味: </strong></MudText>
+    }
+
+    <br />
+    <br />
+    <br />
+
+    @if (dispResult == false)
+    {
+        <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
+        <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
+    }
+
 }
 else
 {
-    <MudText><strong>意味: </strong></MudText>
-}
-
-<br />
-<br />
-<br />
-
-@if (dispResult == false)
-{
-    <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
-}
-else
-{
-    <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
-    <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
+    <MudText Typo="Typo.h5" GutterBottom="true">まだ間違いがありません！</MudText>
 }
 
 
@@ -61,10 +72,15 @@ else
     protected override void OnInitialized()
     {
         //英単語一覧の取得
-        englishWords = EnglishWordService.GetAll().ToList();
+        englishWords = EnglishWordService.GetAll().Where(e => e.MistakenCount > 0).ToList();
+
+        if(englishWords.Count == 0)
+        {
+            return;
+        }
 
         //周回数の取得
-        record = RecordService.Get(1);
+        record = RecordService.Get(2);
 
 
         //表示順の乱数取得
@@ -133,12 +149,12 @@ else
             {
                 reviewMode = false;
                 //英単語一覧の取得
-                englishWords = EnglishWordService.GetAll().ToList();
+                englishWords = EnglishWordService.GetAll().Where(e => e.MistakenCount > 0).ToList();
                 randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
                 record.Count++;
 
                 //周回数の更新
-                RecordService.Update(record, 1);
+                RecordService.Update(record, 2);
             }
         }
     }
