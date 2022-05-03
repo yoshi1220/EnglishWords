@@ -1,57 +1,46 @@
-﻿@page "/mistaken"
+﻿@page "/lesslearning"
 @inject IEnglishWordService EnglishWordService
 @inject IRecordService RecordService
 
 <PageTitle>Learning</PageTitle>
 
-<MudText Typo="Typo.h4" GutterBottom="true">間違えたことのある単語だけモード</MudText>
-
-@if (englishWords.Count != 0)
+<MudText Typo="Typo.h4" GutterBottom="true">学習回数の少ない単語</MudText>
+@if (reviewMode)
 {
+    <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
+}
+
+<br />
 
 
-    @if (reviewMode)
-    {
-        <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
-    }
+<MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
+<br />
 
-    <br />
-
-
-    <MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
-    <br />
-
-    <MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
-    <br />
+<MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
+<br />
 
 
-    @if (dispResult == true)
-    {
-        <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
-    }
-    else
-    {
-        <MudText><strong>意味: </strong></MudText>
-    }
-
-    <br />
-    <br />
-    <br />
-
-    @if (dispResult == false)
-    {
-        <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
-    }
-    else
-    {
-        <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
-        <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
-    }
-
+@if (dispResult == true)
+{
+    <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
 }
 else
 {
-    <MudText Typo="Typo.h5" GutterBottom="true">よく間違える単語はありません。</MudText>
+    <MudText><strong>意味: </strong></MudText>
+}
+
+<br />
+<br />
+<br />
+
+@if (dispResult == false)
+{
+    <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
+}
+else
+{
+    <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
+    <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
 }
 
 
@@ -72,15 +61,11 @@ else
     protected override void OnInitialized()
     {
         //英単語一覧の取得
-        englishWords = EnglishWordService.GetAll().Where(e => e.MistakenCount > 0).ToList();
-
-        if (englishWords.Count == 0)
-        {
-            return;
-        }
+        var maxStudyCount = EnglishWordService.GetAll().Max(n => n.StudyCount);
+        englishWords = EnglishWordService.GetAll().Where(n => n.StudyCount <= (maxStudyCount / 2)).ToList();
 
         //周回数の取得
-        record = RecordService.Get(2);
+        record = RecordService.Get(1);
 
 
         //表示順の乱数取得
@@ -103,9 +88,8 @@ else
     private void ShowNext()
     {
 
-        //正解したので間違えた回数を更新
-        singleWord.StudyCount++; //学習回数
-        singleWord.MistakenCount--;
+        //学習回数を更新
+        singleWord.StudyCount++;
         EnglishWordService.Update(singleWord, singleWord.Id);
 
         //次の単語に進む
@@ -124,8 +108,10 @@ else
         //間違った単語を保存
         mistakenWords.Add(singleWord);
 
+        //学習回数を更新
+        singleWord.StudyCount++;
+
         //間違えた回数を更新
-        singleWord.StudyCount++; //学習回数
         singleWord.MistakenCount++;
         EnglishWordService.Update(singleWord, singleWord.Id);
 
@@ -156,12 +142,15 @@ else
             {
                 reviewMode = false;
                 //英単語一覧の取得
-                englishWords = EnglishWordService.GetAll().Where(e => e.MistakenCount > 0).ToList();
+                var maxStudyCount = EnglishWordService.GetAll().Max(n => n.StudyCount);
+                englishWords = EnglishWordService.GetAll().Where(n => n.StudyCount <= (maxStudyCount / 2)).ToList();
+                
+                //表示順の乱数取得
                 randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();                
 
                 //周回数の更新
                 record.Count++;
-                RecordService.Update(record, 2);
+                RecordService.Update(record, 1);
             }
         }
     }

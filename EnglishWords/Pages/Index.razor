@@ -86,6 +86,11 @@ else
 
     private void ShowNext()
     {
+
+        //学習回数を更新
+        singleWord.StudyCount++;
+        EnglishWordService.Update(singleWord, singleWord.Id);
+
         //次の単語に進む
         ForwardNextWord();
 
@@ -101,6 +106,9 @@ else
     {
         //間違った単語を保存
         mistakenWords.Add(singleWord);
+
+        //学習回数を更新
+        singleWord.StudyCount++;
 
         //間違えた回数を更新
         singleWord.MistakenCount++;
@@ -134,10 +142,12 @@ else
                 reviewMode = false;
                 //英単語一覧の取得
                 englishWords = EnglishWordService.GetAll().ToList();
+
+                //表示順の乱数取得
                 randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
-                record.Count++;
 
                 //周回数の更新
+                record.Count++;
                 RecordService.Update(record, 1);
             }
         }
