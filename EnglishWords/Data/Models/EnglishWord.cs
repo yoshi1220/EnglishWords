@@ -21,6 +21,9 @@ namespace EnglishWords.Data.Models
         [Required(ErrorMessage = "意味は必須です")]
         public string Meaning { get; set; }
 
+        [Required(ErrorMessage = "間違えた回数は必須です")]
+        public int MistakenCount { get; set; }
+
         [Timestamp]
         public byte[] TimeStamp { get; set; }
     }

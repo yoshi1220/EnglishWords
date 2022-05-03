@@ -19,9 +19,12 @@ builder.Services.AddDbContext<EnglishWordsDbContext>(options =>
 
 //RepositoryŠÖ˜A
 builder.Services.AddScoped<IEnglishWordRepository, EnglishWordRepository>(); //EntityFrameworkCore‚ğg‚¤ê‡
+builder.Services.AddScoped<IRecordRepository, RecordRepository>();
 
 //ServiceŠÖ˜A            
 builder.Services.AddScoped<IEnglishWordService, EnglishWordService>();
+builder.Services.AddScoped<IRecordService, RecordService>();
+
 
 var app = builder.Build();
 

@@ -9,6 +9,8 @@ namespace EnglishWords.Data
 
         public DbSet<Chapter> Chapters { get; set; }
 
+        public DbSet<Record> Records { get; set; }
+
         public EnglishWordsDbContext(DbContextOptions<EnglishWordsDbContext> options) : base(options)
         {
         }

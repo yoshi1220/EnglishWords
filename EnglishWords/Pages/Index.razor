@@ -1,53 +1,71 @@
 ﻿@page "/"
 @inject IEnglishWordService EnglishWordService
+@inject IRecordService RecordService
 
 <PageTitle>Learning</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">English Words Test used in WPF 4.5 Unleashed</MudText>
+@if (reviewMode)
+{
+    <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
+}
+
 <br />
 
 
-<MudText>周回数: @laps, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
+<MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
 <br />
 
-<MudText Typo="Typo.h5" GutterBottom="true">@word</MudText>
+<MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
+<br />
+
+
+@if (dispResult == true)
+{
+    <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
+}
+else
+{
+    <MudText><strong>意味: </strong></MudText>
+}
+
+<br />
+<br />
 <br />
 
 @if (dispResult == false)
 {
-    <button type="button" class="btn btn-primary" @onclick="ShowResult">表示</button>
+    <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
 }
 else
 {
-    <button type="button" class="btn btn-secondary" @onclick="ShowNext">次</button>
+    <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
+    <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
 }
-
-<br />
-<br />
-
-@if (dispResult == true)
-{
-    <MudText Typo="Typo.h5" GutterBottom="true">@meaning</MudText>
-}
-
-
 
 
 @code {
     private List<EnglishWord> englishWords;
+    private List<EnglishWord> mistakenWords = new List<EnglishWord>();
+    private Record record;
+
     private List<int> randomNumbers;
     private EnglishWord singleWord;
     private string word;
     private string meaning;
     private int count = 0;
-    private int laps = 1;
 
     private bool dispResult = false;
+    private bool reviewMode = false;
 
     protected override void OnInitialized()
     {
         //英単語一覧の取得
         englishWords = EnglishWordService.GetAll().ToList();
+
+        //周回数の取得
+        record = RecordService.Get(1);
+
 
         //表示順の乱数取得
         randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
@@ -68,12 +86,8 @@ else
 
     private void ShowNext()
     {
-        count++;
-        if (count == englishWords.Count)
-        {
-            count = 0;
-            laps++;
-        }
+        //次の単語に進む
+        ForwardNextWord();
 
         //次の単語の情報をセット
         singleWord = englishWords[randomNumbers[count]];
@@ -81,6 +95,62 @@ else
         meaning = singleWord.Meaning;
         dispResult = false;
         this.StateHasChanged();
+    }
+
+    private void ShowNextByMistake()
+    {
+        //間違った単語を保存
+        mistakenWords.Add(singleWord);
+
+        //次の単語に進む
+        ForwardNextWord();
+
+        //次の単語の情報をセット
+        singleWord = englishWords[randomNumbers[count]];
+        word = singleWord.Word;
+        meaning = singleWord.Meaning;
+        dispResult = false;
+        this.StateHasChanged();
+    }
+
+    private void ForwardNextWord()
+    {
+        count++;
+        if (count == englishWords.Count)
+        {
+            count = 0;
+
+            if (!IsCompletedAllWord())
+            {
+                reviewMode = true;
+                return;
+            }
+            else
+            {
+                reviewMode = false;
+                //英単語一覧の取得
+                englishWords = EnglishWordService.GetAll().ToList();
+                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
+                record.Count++;
+
+                //周回数の更新
+                RecordService.Update(record, 1);
+            }
+        }
+    }
+
+    private bool IsCompletedAllWord()
+    {
+        if (mistakenWords.Count == 0)
+        {
+            return true;
+        }
+
+        englishWords = new List<EnglishWord>(mistakenWords);
+        randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
+        mistakenWords = new List<EnglishWord>();
+
+        return false;
     }
 
     /// <summary>
