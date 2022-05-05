@@ -5,44 +5,51 @@
 <PageTitle>Learning</PageTitle>
 
 <MudText Typo="Typo.h4" GutterBottom="true">学習回数の少ない単語</MudText>
-@if (reviewMode)
+@if (englishWords.Count != 0)
 {
-    <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
-}
 
-<br />
+    @if (reviewMode)
+    {
+        <MudText Typo="Typo.h5" GutterBottom="true"><strong>復習モード</strong></MudText>
+    }
 
-
-<MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
-<br />
-
-<MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
-<br />
+    <br />
 
 
-@if (dispResult == true)
-{
-    <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
+    <MudText>周回数: @record.Count, 学習単語数: @(count + 1) / @englishWords.Count </MudText>
+    <br />
+
+    <MudText><strong>単語:</strong>&nbsp;&nbsp; @word</MudText>
+    <br />
+
+
+    @if (dispResult == true)
+    {
+        <MudText><strong>意味:</strong>&nbsp;&nbsp; @meaning</MudText>
+    }
+    else
+    {
+        <MudText><strong>意味: </strong></MudText>
+    }
+
+    <br />
+    <br />
+    <br />
+
+    @if (dispResult == false)
+    {
+        <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
+        <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
+    }
 }
 else
 {
-    <MudText><strong>意味: </strong></MudText>
+    <MudText Typo="Typo.h5" GutterBottom="true">学習回数が少ない単語はありません。</MudText>
 }
-
-<br />
-<br />
-<br />
-
-@if (dispResult == false)
-{
-    <button type="button" class="btn btn-primary" @onclick="ShowResult">意味の表示</button>
-}
-else
-{
-    <button type="button" class="btn btn-primary" @onclick="ShowNext">分かった！</button>
-    <button type="button" class="btn btn-secondary" @onclick="ShowNextByMistake">分からない</button>
-}
-
 
 @code {
     private List<EnglishWord> englishWords;
@@ -63,6 +70,11 @@ else
         //英単語一覧の取得
         var maxStudyCount = EnglishWordService.GetAll().Max(n => n.StudyCount);
         englishWords = EnglishWordService.GetAll().Where(n => n.StudyCount <= (maxStudyCount / 2)).ToList();
+
+        if (englishWords.Count == 0)
+        {
+            englishWords = EnglishWordService.GetAll().ToList();
+        }
 
         //周回数の取得
         record = RecordService.Get(1);
@@ -136,6 +148,11 @@ else
             if (!IsCompletedAllWord())
             {
                 reviewMode = true;
+
+                englishWords = new List<EnglishWord>(mistakenWords);
+                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
+                mistakenWords = new List<EnglishWord>();
+
                 return;
             }
             else
@@ -144,9 +161,14 @@ else
                 //英単語一覧の取得
                 var maxStudyCount = EnglishWordService.GetAll().Max(n => n.StudyCount);
                 englishWords = EnglishWordService.GetAll().Where(n => n.StudyCount <= (maxStudyCount / 2)).ToList();
-                
+
+                if (englishWords.Count == 0)
+                {
+                    englishWords = EnglishWordService.GetAll().ToList();
+                }
+
                 //表示順の乱数取得
-                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();                
+                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
 
                 //周回数の更新
                 record.Count++;
@@ -161,10 +183,6 @@ else
         {
             return true;
         }
-
-        englishWords = new List<EnglishWord>(mistakenWords);
-        randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
-        mistakenWords = new List<EnglishWord>();
 
         return false;
     }

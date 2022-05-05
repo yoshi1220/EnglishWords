@@ -1,0 +1,35 @@
+﻿@page "/translatedlist"
+@inject ITranslationService TranslationService
+
+<PageTitle>翻訳リスト</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">Translated List</MudText>
+<br />
+
+@if (trans != null)
+{
+    <MudTable Items="trans" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<Translation, object>(x=>x.OriginalSentence)"><strong>原文</strong></MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Translation, object>(x=>x.TranslatedSentence)"><strong>翻訳</strong></MudTableSortLabel></MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="">@context.OriginalSentence</MudTd>
+            <MudTd DataLabel="">@context.TranslatedSentence</MudTd>
+        </RowTemplate>
+        
+    </MudTable>
+
+}
+
+@code {
+    private List<Translation> trans;
+
+    protected override void OnInitialized()
+    {
+        //英単語一覧の取得
+        trans = TranslationService.GetAll().OrderBy(n => n.Id).ToList();
+    }
+
+}

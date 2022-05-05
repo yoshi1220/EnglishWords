@@ -11,6 +11,8 @@ namespace EnglishWords.Data
 
         public DbSet<Record> Records { get; set; }
 
+        public DbSet<Translation> Translations { get; set; }
+
         public EnglishWordsDbContext(DbContextOptions<EnglishWordsDbContext> options) : base(options)
         {
         }

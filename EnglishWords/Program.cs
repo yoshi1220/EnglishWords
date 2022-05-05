@@ -18,12 +18,14 @@ builder.Services.AddDbContext<EnglishWordsDbContext>(options =>
 });
 
 //RepositoryŠÖ˜A
-builder.Services.AddScoped<IEnglishWordRepository, EnglishWordRepository>(); //EntityFrameworkCore‚ğg‚¤ê‡
+builder.Services.AddScoped<IEnglishWordRepository, EnglishWordRepository>();
 builder.Services.AddScoped<IRecordRepository, RecordRepository>();
+builder.Services.AddScoped<ITranslationRepository, TranslationRepository>();
 
 //ServiceŠÖ˜A            
 builder.Services.AddScoped<IEnglishWordService, EnglishWordService>();
 builder.Services.AddScoped<IRecordService, RecordService>();
+builder.Services.AddScoped<ITranslationService, TranslationService>();
 
 
 var app = builder.Build();

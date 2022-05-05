@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnglishWords.Migrations
 {
     [DbContext(typeof(EnglishWordsDbContext))]
-    [Migration("20220503014321_AddRecord")]
-    partial class AddRecord
+    [Migration("20220505135654_AddTranslations2")]
+    partial class AddTranslations2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -54,6 +54,9 @@ namespace EnglishWords.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<bool>("Answered")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ChapterName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -61,6 +64,12 @@ namespace EnglishWords.Migrations
                     b.Property<string>("Meaning")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MistakenCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudyCount")
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("TimeStamp")
                         .IsConcurrencyToken()
@@ -74,6 +83,52 @@ namespace EnglishWords.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EnglishWords");
+                });
+
+            modelBuilder.Entity("EnglishWords.Data.Models.Record", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("TimeStamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Records");
+                });
+
+            modelBuilder.Entity("EnglishWords.Data.Models.Translation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Chapter")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OriginalSentence")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TranslatedSentence")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Translations");
                 });
 #pragma warning restore 612, 618
         }

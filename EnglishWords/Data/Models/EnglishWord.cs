@@ -27,6 +27,9 @@ namespace EnglishWords.Data.Models
         [Required(ErrorMessage = "学習回数は必須です")]
         public int StudyCount { get; set; }
 
+        [Required(ErrorMessage = "回答済みは必須です")]
+        public bool Answered { get; set; }
+
         [Timestamp]
         public byte[] TimeStamp { get; set; }
     }

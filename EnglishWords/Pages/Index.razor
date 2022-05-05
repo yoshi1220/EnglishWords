@@ -61,7 +61,7 @@ else
     protected override void OnInitialized()
     {
         //英単語一覧の取得
-        englishWords = EnglishWordService.GetAll().ToList();
+        englishWords = EnglishWordService.GetAll().Where(n => n.Answered == false).ToList();
 
         //周回数の取得
         record = RecordService.Get(1);
@@ -87,6 +87,9 @@ else
     private void ShowNext()
     {
 
+        //回答済みを更新
+        singleWord.Answered = true;
+
         //学習回数を更新
         singleWord.StudyCount++;
         EnglishWordService.Update(singleWord, singleWord.Id);
@@ -109,6 +112,9 @@ else
 
         //学習回数を更新
         singleWord.StudyCount++;
+
+        //回答済みを更新
+        singleWord.Answered = true;
 
         //間違えた回数を更新
         singleWord.MistakenCount++;
@@ -134,21 +140,36 @@ else
 
             if (!IsCompletedAllWord())
             {
+                //復習モード
                 reviewMode = true;
+
+                englishWords = new List<EnglishWord>(mistakenWords);
+                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
+                mistakenWords = new List<EnglishWord>();
+
                 return;
             }
             else
             {
+                //復習モード終了
                 reviewMode = false;
-                //英単語一覧の取得
-                englishWords = EnglishWordService.GetAll().ToList();
-
-                //表示順の乱数取得
-                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
 
                 //周回数の更新
                 record.Count++;
                 RecordService.Update(record, 1);
+
+                //英単語一覧の取得、回答済みを戻す
+                englishWords = EnglishWordService.GetAll().Where(n => n.Answered == true).ToList();
+
+                foreach (var word in englishWords)
+                {
+                    word.Answered = false;
+                    EnglishWordService.Update(word, word.Id);
+                }
+
+                //表示順の乱数取得
+                randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
+
             }
         }
     }
@@ -159,10 +180,6 @@ else
         {
             return true;
         }
-
-        englishWords = new List<EnglishWord>(mistakenWords);
-        randomNumbers = GetUniqRandomNumbersEasy(0, englishWords.Count - 1, englishWords.Count).ToList();
-        mistakenWords = new List<EnglishWord>();
 
         return false;
     }

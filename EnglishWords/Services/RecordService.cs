@@ -22,10 +22,7 @@ namespace EnglishWords.Services
             return _RecordRepository.Get(id);
         }
 
-        /// <summary>
-        /// ユーザーデータを全件取得
-        /// </summary>
-        /// <returns></returns>
+
         public IEnumerable<Record> GetAll()
         {
             return _RecordRepository.GetAll();
