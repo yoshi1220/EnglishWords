@@ -133,6 +133,7 @@ else
         //間違えた回数を更新
         singleWord.StudyCount++; //学習回数
         singleWord.MistakenCount++;
+        singleWord.TotalMistakenCount++;
         EnglishWordService.Update(singleWord, singleWord.Id);
 
         //次の単語に進む

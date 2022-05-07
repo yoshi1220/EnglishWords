@@ -125,6 +125,7 @@ else
 
         //間違えた回数を更新
         singleWord.MistakenCount++;
+        singleWord.TotalMistakenCount++;
         EnglishWordService.Update(singleWord, singleWord.Id);
 
         //次の単語に進む
